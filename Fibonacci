@@ -1,0 +1,85 @@
+#This program will calculate the 'n'th number of a 
+#a fibonacci sequence
+
+.data
+   
+prompt:  
+   .asciiz  "\n Which fibonacci number do you want? "        
+
+fib1:
+   .asciiz  "\n Fibonacci # "      
+   
+fib2:  
+   .asciiz  " is "   
+
+Input:      .word  0              # variable for user input (n)
+Answer:     .word  0              # value of fib(n)
+         
+   
+ .text           
+       .globl main
+       main: 
+                            
+      li $v0, 4                
+      la $a0, prompt          # this prints 'Which fibonacci number do you want?'
+      syscall
+      
+      li $v0, 5               # system call for reading int
+      syscall
+      sw $v0, Input 
+      
+      lw   $a0, Input        # loads inpuut 'n' into input
+      jal  fib               # runs the fib function on n
+      sw   $v0, Answer       # obtains fib(n)
+   
+      li $v0, 4                
+      la $a0, fib1          # prints 'fibonacci # '
+      syscall
+      
+      li $v0, 4         
+      la $a0, Input
+      syscall
+      
+      li $v0, 4                
+      la $a0, fib2          # prints 'fibonacci # '
+      syscall
+                
+      li $v0, 1             # command for printing the answer
+      lw $a0, Answer
+      syscall
+      
+      
+      li $v0, 10           # ending the call
+      syscall
+                                                  
+      
+      fib:
+        
+        bgt  $a0,1,recur         # if n >1 then go to branch 'recur' for recursion
+        move $v0, $a0            
+        jr   $ra
+     
+      recur:
+      
+        sub  $sp, $sp, 12        # saves $ra 
+        sw   $ra, 0($sp)
+        
+        
+        sw   $a0, 4($sp)       # n
+        addi $a0,$a0,-1        # (n-1)
+        jal  fib
+        lw   $a0, 4($sp)
+     
+        sw   $v0, 8($sp)       # saves value of fib(n-1)
+        addi $a0,$a0,-2        # (n-2)
+        jal  fib
+        lw   $t0,8($sp)        # saves fib(n-2)
+        
+        add  $v0, $t0, $v0     # adds up fib(n-1) + fib(n-2)
+       
+        lw   $ra, 0($sp)
+        add  $sp, $sp, 12
+        jr   $ra
+        
+                          
+                       
