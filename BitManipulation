@@ -1,0 +1,103 @@
+#This program extracts the rightmost 5 bits (bits 0 to 4) from #and replaces bits 2 to 6 of the data word with the above bits
+
+
+
+        .data
+strt:   
+        .word 28
+        .word -60
+        .word 99
+        .word -82
+        .word 23465
+        .word 536870913 
+        .word 0  # Sentinel value to stop the program
+    
+prompt: .asciiz "The input key is "
+tex1:   .asciiz "\nAfter processing the value "
+tex2:   .asciiz " becomes "
+tex3:   .asciiz " text u want is  "
+        .text
+main:   
+        
+        la   $a0, prompt      # asks for the number
+        li   $v0, 4         
+        syscall              
+    	
+        li   $v0, 5           # takes and stores user inout in $v0
+        syscall
+    
+  
+        move $s2, $v0        # transfers user input from $v0 to $s2
+        addi $s6, $zero, 0   # initialises s6 to 0
+loop:   
+        #### Your code goes below
+          
+        
+        lw  $s1, strt($s6)          # extracts the first word in the array
+   
+        beq $s1, $zero, done        # end of array if the element is 0
+        bgt $s1,536870912,loop2     # if the word is greater than 2^29 then we consider bit 30 must be 1        
+      
+        
+ 
+        
+        or  $8,$0,$s2               # sets register 8 to s2
+        ori $9,$0, 127              # 0111 1111
+        and $10, $8, $9             # first seven bits(0-6) extracted from the user input
+        
+        sll $s3, $10, 8            # shift by 8 units 
+        andi $s5,$s1,4294934783     # 11111111111111111000000011111111
+        or $s4, $s5, $s3            # and now we replace the 8-14 th bits 
+        
+        la   $a0, tex1              # prints prompt ' after processing the value'
+        li   $v0, 4         
+        syscall 
+         
+        li $v0, 1                  # prints the word
+        move $a0, $s1   
+        syscall    
+        
+        la   $a0, tex2             # prints the prompt 'becomes '
+        li   $v0, 4         
+        syscall     
+         
+        li $v0, 1                  # prints the answer
+        move $a0, $s4                          
+        syscall          
+        
+        addi $s6, $s6, 4            # goes to the next word
+       
+              
+
+         j loop
+
+loop2:
+
+        or  $8,$0,$s2               # sets register 8 to s2
+        ori $9,$0, 31               
+        and $10, $8, $9             # first five bits extracted from the user input
+        
+        sll $s3, $10, 2             # these three lines shift them to the left by two units
+        andi $s5,$s1,65411          # sets 2nd to 5th bits to 0 (of the word) 
+        or $s4, $s5, $s3            # and now it replaces 2-6 of the word list
+        
+        la   $a0, tex1              # the next 4 paragraphs are same as loop1
+        li   $v0, 4         
+        syscall 
+         
+        li $v0, 1 
+        move $a0, $s1   
+        syscall    
+        
+        la   $a0, tex2
+        li   $v0, 4         
+        syscall     
+        
+        li $v0, 1 
+        move $a0, $s4                          
+        syscall          
+         
+     
+done:   
+        li  $v0, 10
+        syscall
